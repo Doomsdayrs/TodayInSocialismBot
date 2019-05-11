@@ -27,9 +27,9 @@ import java.nio.charset.StandardCharsets;
  * @author github.com/doomsdayrs
  */
 
-class Config {
+public class Config {
     private static final String configFile = "data.json";
-    private static String execDir;
+    public static String execDir;
     static {
         try {
             execDir = getExecDir();
@@ -110,7 +110,7 @@ class Config {
      *
      * @return the execution directory
      */
-    private static String getExecDir() throws UnsupportedEncodingException {
+    public static String getExecDir() throws UnsupportedEncodingException {
         String decodedPath;
         String runtimePath = Core.class.getProtectionDomain()
                 .getCodeSource().getLocation().getPath();

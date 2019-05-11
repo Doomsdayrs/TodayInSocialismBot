@@ -19,7 +19,9 @@ package com.github.doomsdayrs.TodayInSocialism.core;
  *
  * @author github.com/doomsdayrs
  */
-class Version {
-    static String VersionNum = "0.1.0-beta";
-    static String changeLog = "Initial";
+public class Version {
+    public static String VersionNum = "0.1.1-beta";
+    public static String changeLog = "*Created other supporting classes" +
+            "\n*TODO list is still there" +
+            "\n*2 new commands";
 }
