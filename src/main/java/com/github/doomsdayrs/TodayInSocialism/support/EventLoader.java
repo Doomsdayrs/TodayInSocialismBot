@@ -8,7 +8,6 @@ import org.json.simple.parser.ParseException;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 
@@ -36,10 +35,8 @@ public class EventLoader {
 
     private static final String url = "https://raw.githubusercontent.com/Doomsdayrs/TodayInSocialismBot/master/events.json";
 
-    public static void main(String[] args) throws IOException {
-        FileWriter fileWriter = new FileWriter(new File("/home/doomsdayrs/IdeaProjects/TodayInSocialismBot/events.json"));
-        fileWriter.write(jsonArray.toJSONString());
-        fileWriter.flush();
+    public static void main(String[] args) throws IOException, ParseException {
+        initialize();
     }
 
     public static void initialize() throws IOException, ParseException {

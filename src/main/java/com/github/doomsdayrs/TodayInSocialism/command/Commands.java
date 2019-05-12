@@ -57,7 +57,7 @@ public class Commands implements CommandExecutor {
 
     @Command(aliases = {"invite"}, description = "Gets bot invite")
     public void onInviteCommand(TextChannel channel, User user) {
-        Logs.logCommand(channel, user, "info");
+        Logs.logCommand(channel, user, "invite");
         channel.sendMessage(api.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES, PermissionType.READ_MESSAGES, PermissionType.ATTACH_FILE, PermissionType.EMBED_LINKS).build()));
     }
 
@@ -102,7 +102,7 @@ public class Commands implements CommandExecutor {
 
     @Command(aliases = {"backup"}, showInHelpPage = false)
     public void onBackupCommand(TextChannel channel, User user) {
-        Logs.logCommand(channel, user, "store");
+        Logs.logCommand(channel, user, "backup");
         String ID = user.getIdAsString();
 
         if (ID.equals("244481558831038464")) {
@@ -120,13 +120,29 @@ public class Commands implements CommandExecutor {
 
     @Command(aliases = {"dl"}, showInHelpPage = false)
     public void onDLCommand(TextChannel channel, User user) {
-        Logs.logCommand(channel, user, "store");
+        Logs.logCommand(channel, user, "dl");
         String ID = user.getIdAsString();
         if (ID.equals("244481558831038464")) {
             try {
                 EventLoader.downloadLatest();
                 System.out.println("Downloaded latest");
             } catch (IOException | ParseException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            channel.sendMessage(Embeds.message("You aren't my creator silly!"));
+        }
+    }
+
+    @Command(aliases = {"tA"}, showInHelpPage = false)
+    public void onTAommand(TextChannel channel, User user) {
+        Logs.logCommand(channel, user, "tA");
+        String ID = user.getIdAsString();
+        if (ID.equals("244481558831038464")) {
+            try {
+                SQLControl.announce(api);
+            } catch (ParseException | SQLException e) {
                 e.printStackTrace();
             }
 

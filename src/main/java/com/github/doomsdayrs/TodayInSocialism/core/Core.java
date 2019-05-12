@@ -88,6 +88,8 @@ public class Core {
                         "\n I'm programed and maintained by doomsdayrs@gmail.com! " +
                         "\n This is my prefix ``" + cmdHandler.getDefaultPrefix() + "``"));
         System.out.println(API.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES, PermissionType.READ_MESSAGES, PermissionType.ATTACH_FILE, PermissionType.EMBED_LINKS).build()));
+        while (true) {
 
+        }
     }
 }

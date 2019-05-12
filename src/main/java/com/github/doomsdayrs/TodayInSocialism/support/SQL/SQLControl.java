@@ -1,5 +1,6 @@
 package com.github.doomsdayrs.TodayInSocialism.support.SQL;
 
+import com.github.doomsdayrs.TodayInSocialism.support.EventLoader;
 import com.github.doomsdayrs.TodayInSocialism.support.UnsetChannelException;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.Channel;
@@ -14,6 +15,7 @@ import org.json.simple.parser.ParseException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
@@ -48,11 +50,7 @@ public class SQLControl {
         System.out.println("Done!");
     }
 
-    private static void newServer(long id) throws SQLException {
-        Statement statement = SQL.connection.createStatement();
-        if ((statement.executeQuery("select count() from serverData where id = " + id).getInt("count()")) != 1) // Checks if the server row exists in serverData table
-            statement.executeUpdate("insert into serverData (id) values(" + id + ")"); // Inserts fresh Data
-    }
+    private static final String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
 
 
     public static boolean setChannel(long serverID, long channelID) throws SQLException, ParseException {
@@ -94,35 +92,73 @@ public class SQLControl {
         return false;
     }
 
+    private static void newServer(long id) throws SQLException {
+        Statement statement = SQL.connection.createStatement();
+        if ((statement.executeQuery("select count() from serverData where id = " + id).getInt("count()")) != 1) // Checks if the server row exists in serverData table
+            statement.executeUpdate("insert into serverData (id,lastOut) values(" + id + ",0)"); // Inserts fresh Data
+    }
+
     public static void announce(DiscordApi api) throws SQLException, ParseException {
         Statement statement = SQL.connection.createStatement();
-        ResultSet set = statement.executeQuery("select id,config from serverData");
+        ResultSet set = statement.executeQuery("select id,config,lastOut from serverData");
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
+
+        ArrayList<String> messageQueue = new ArrayList<>();
+        boolean events = false;
+        for (int x = 0; x < EventLoader.jsonArray.size(); x++) {
+            JSONObject event = (JSONObject) EventLoader.jsonArray.get(x);
+            String[] date = event.get("date").toString().split(",");
+            if (dateTime.getMonthOfYear() == Integer.parseInt(date[1])) {
+                if (dateTime.getDayOfMonth() == Integer.parseInt(date[0])) {
+                    if (!events) events = true;
+                    String message = date[0] + "/" + date[1] + "/" + date[2];
+                    message = message + "\n" + event.get("description").toString();
+                    if (event.containsKey("importantLinks"))
+                        message = message + "\n" + event.get("importantLinks").toString();
+                    messageQueue.add(message);
+                }
+            }
+        }
+
         while (set.next()) {
             System.out.println(set.getString("id"));
-            String configString = set.getString("config");
-            if (configString != null) {
-                JSONObject jsonObject = (JSONObject) new JSONParser().parse(configString);
-                String time = jsonObject.get("time").toString();
-                if (time != null && !time.isEmpty()) {
-                    int hour = Integer.parseInt(time);
-                    if (dateTime.getHourOfDay() == hour) {
-                        statement.executeUpdate("updateServerData set lastOut = " + new Date().getTime());
-                        long channelID = Long.parseLong(jsonObject.get("channel").toString());
-                        Optional<Channel> optionalChannel = api.getChannelById(channelID);
-                        if (optionalChannel.isPresent()) {
-                            Channel channel = optionalChannel.get();
-                            Optional<TextChannel> optionalTextChannel = channel.asTextChannel();
-                            if (optionalTextChannel.isPresent()) {
-                                TextChannel textChannel = optionalTextChannel.get();
-                                //TODO Create event output loop
+
+
+            //Continues if there are events
+            if (events) {
+                String configString = set.getString("config");
+                if (configString != null) { //Checks to see if config isnt null
+                    JSONObject jsonObject = (JSONObject) new JSONParser().parse(configString);
+                    String time = jsonObject.get("time").toString();
+                    if (time != null && !time.isEmpty()) {//Checks to see if time was set or not.
+                        int hour = Integer.parseInt(time);
+                        if (dateTime.getHourOfDay() == hour) {//Checks to see if it is time to announce for them
+                            long currentTime = new Date().getTime();
+                            long lastTime = set.getLong("lastOut");
+                            if (currentTime >= lastTime + 86400000) {//Announces if they haven't been informed in 24 hours
+                                statement.executeUpdate("updateServerData set lastOut = " + currentTime);
+                                //Gets the channel
+                                long channelID = Long.parseLong(jsonObject.get("channel").toString());
+                                Optional<Channel> optionalChannel = api.getChannelById(channelID);
+                                if (optionalChannel.isPresent()) {
+                                    Channel channel = optionalChannel.get();
+                                    Optional<TextChannel> optionalTextChannel = channel.asTextChannel();
+                                    if (optionalTextChannel.isPresent()) {
+                                        TextChannel textChannel = optionalTextChannel.get();
+                                        //Announces the events of today
+                                        //TODO Change this to be a different form of @everyone
+                                        textChannel.sendMessage("@everyone");
+                                        for (String string : messageQueue)
+                                            textChannel.sendMessage(string);
+                                    }
+                                }
                             }
                         }
                     }
+
                 }
 
             }
-
         }
     }
 }
