@@ -1,15 +1,24 @@
 package com.github.doomsdayrs.TodayInSocialism.command;
 
 import com.github.doomsdayrs.TodayInSocialism.core.Version;
+import com.github.doomsdayrs.TodayInSocialism.support.Embeds;
 import com.github.doomsdayrs.TodayInSocialism.support.Logs;
+import com.github.doomsdayrs.TodayInSocialism.support.SQL.SQL;
+import com.github.doomsdayrs.TodayInSocialism.support.SQL.SQLControl;
+import com.github.doomsdayrs.TodayInSocialism.support.UnsetChannelException;
 import de.btobastian.sdcf4j.Command;
 import de.btobastian.sdcf4j.CommandExecutor;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.permission.PermissionType;
-import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.PermissionsBuilder;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This file is part of TodayInSocialismBot.
@@ -34,7 +43,8 @@ import org.javacord.api.entity.user.User;
 public class Commands implements CommandExecutor {
 
     private DiscordApi api;
-    public Commands(DiscordApi api){
+
+    public Commands(DiscordApi api) {
         this.api = api;
     }
 
@@ -47,7 +57,102 @@ public class Commands implements CommandExecutor {
     @Command(aliases = {"invite"}, description = "Gets bot invite")
     public void onInviteCommand(TextChannel channel, User user) {
         Logs.logCommand(channel, user, "info");
-        channel.sendMessage(api.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES,PermissionType.READ_MESSAGES,PermissionType.ATTACH_FILE,PermissionType.EMBED_LINKS).build()));
+        channel.sendMessage(api.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES, PermissionType.READ_MESSAGES, PermissionType.ATTACH_FILE, PermissionType.EMBED_LINKS).build()));
     }
 
+    @Command(aliases = {"Shutdown"}, showInHelpPage = false)
+    public void onShutDownCommand(TextChannel channel, User user) {
+        Logs.logCommand(channel, user, "Shutdown");
+        String ID = user.getIdAsString();
+
+        if (ID.equals("244481558831038464")) {
+            System.out.println("User " + user.getDiscriminatedName() + " has shutdown the bot");
+            channel.sendMessage(Embeds.messageImage("Goodnight for now", "https://i.imgur.com/mwGf0kK.gif"));
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            System.exit(0);
+        } else {
+            System.out.println("(" + ID + ") " + user.getDiscriminatedName() + " Attempted to shutdown bot without being owner");
+            channel.sendMessage(Embeds.message("You aren't my creator silly!"));
+        }
+    }
+
+    @Command(aliases = {"store"}, showInHelpPage = false)
+    public void onStoreCommand(TextChannel channel, User user) {
+        Logs.logCommand(channel, user, "store");
+        String ID = user.getIdAsString();
+
+        if (ID.equals("244481558831038464")) {
+            try {
+                SQL.toHard();
+                channel.sendMessage(Embeds.message("Stored database"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            channel.sendMessage(Embeds.message("You aren't my creator silly!"));
+        }
+    }
+
+    @Command(aliases = {"backup"}, showInHelpPage = false)
+    public void onBackupCommand(TextChannel channel, User user) {
+        Logs.logCommand(channel, user, "store");
+        String ID = user.getIdAsString();
+
+        if (ID.equals("244481558831038464")) {
+            try {
+                SQL.backup();
+                channel.sendMessage(Embeds.message("Backed up database"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            channel.sendMessage(Embeds.message("You aren't my creator silly!"));
+        }
+    }
+
+    @Command(aliases = {"setChannel", "sc"}, description = "sets the channel for the bot to use, FIRST THING TO DO")
+    public void onSetChannelCommand(TextChannel channel, Server server, User user) {
+        Logs.logCommand(channel, user, "info");
+        if (server != null) {
+            try {
+                if (SQLControl.setChannel(server.getId(), channel.getId()))
+                    channel.sendMessage(Embeds.message("Set properly"));
+                else channel.sendMessage(Embeds.message("Not set"));
+            } catch (SQLException | ParseException e) {
+                System.out.println("Something went wrong");
+                channel.sendMessage(Embeds.message("Something went wrong!!!"));
+            }
+        } else channel.sendMessage(Embeds.message("Not une server"));
+    }
+
+    @Command(aliases = {"setTime", "st"}, description = "sets the time to announce events, 24 hour based on UTC")
+    public void onSetTimeCommand(TextChannel channel, Server server, User user, String command, String timeString) {
+        Logs.logCommand(channel, user, "info");
+        if (server != null) {
+            try {
+                int time = Integer.parseInt(timeString.replace(command, ""));
+                if (time < 24 && time > -1) {
+                    try {
+                        if (SQLControl.setHour(server.getId(), time))
+                            channel.sendMessage(Embeds.message("Set properly"));
+                        else channel.sendMessage(Embeds.message("Not set"));
+                    } catch (SQLException | ParseException e) {
+                        System.out.println("Something went wrong");
+                        channel.sendMessage(Embeds.message("Something went wrong!!!"));
+                    } catch (UnsetChannelException e) {
+                        channel.sendMessage(Embeds.message("Please set the channel first fools!"));
+                    }
+                } else channel.sendMessage(Embeds.message("Time provided is out of bounds!"));
+            } catch (NumberFormatException e) {
+                channel.sendMessage(Embeds.message("That is not an hour of the day"));
+            }
+        } else channel.sendMessage(Embeds.message("Not une server"));
+    }
 }

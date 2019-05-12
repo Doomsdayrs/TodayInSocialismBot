@@ -38,7 +38,7 @@ public class Config {
         }
     }
 
-    private static final String[] names = {"token"};
+    private static final String[] names = {"token", "ramdisk", "databaseName"};
 
     /**
      * Looks for a config.properties config file in the application root directory.
@@ -82,8 +82,9 @@ public class Config {
                     System.out.println("I can't even delete it smh");
                 System.exit(1);
             }
-            if (!jsonObject.containsKey(names[0])){
-                System.out.println("Missing key: " + names[0]);
+            for (String name : names)
+                if (!jsonObject.containsKey(name)) {
+                    System.out.println("Missing key: " + name);
                 System.exit(1);
             }
         }

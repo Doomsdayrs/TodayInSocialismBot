@@ -1,5 +1,9 @@
 package com.github.doomsdayrs.TodayInSocialism.support;
 
+import org.javacord.api.entity.message.embed.EmbedBuilder;
+
+import java.awt.*;
+
 /**
  * This file is part of TodayInSocialismBot.
  * TodayInSocialismBot is free software: you can redistribute it and/or modify
@@ -15,10 +19,19 @@ package com.github.doomsdayrs.TodayInSocialism.support;
  * ====================================================================
  * TodayInSocialismBot
  * com.github.doomsdayrs.TodayInSocialism.support
- * 09 / 05 / 2019
+ * 11 / 05 / 2019
  *
  * @author github.com/doomsdayrs
  */
-//TODO Write SQL control system
-public class SQLControl {
+public class Embeds {
+    public static EmbedBuilder message(String message) {
+        return new EmbedBuilder()
+                .setColor(Color.RED)
+                .setDescription(message);
+    }
+
+    public static EmbedBuilder messageImage(String message, String url) {
+        return new EmbedBuilder().setColor(Color.RED)
+                .setDescription(message).setUrl(url);
+    }
 }

@@ -1,11 +1,5 @@
 package com.github.doomsdayrs.TodayInSocialism.support;
 
-import com.github.doomsdayrs.TodayInSocialism.core.Config;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * This file is part of TodayInSocialismBot.
  * TodayInSocialismBot is free software: you can redistribute it and/or modify
@@ -21,16 +15,24 @@ import java.util.Date;
  * ====================================================================
  * TodayInSocialismBot
  * com.github.doomsdayrs.TodayInSocialism.support
- * 10 / 05 / 2019
+ * 11 / 05 / 2019
  *
  * @author github.com/doomsdayrs
  */
-public class Others {
-    static final Date date = new Date();
-    static final DateFormat dateFormat = new SimpleDateFormat(" yyyy MM dd HH mmm ss");
-    static final DateFormat dateFormatForFile = new SimpleDateFormat(" yyyy-MM-dd-HH-mm");
-    public static String[] config;
-    public static String path = Config.execDir;
-    static int commandsExecuted;
-}
+public class UnsetChannelException extends Exception {
+    public UnsetChannelException() {
+        super();
+    }
 
+    public UnsetChannelException(String message) {
+        super(message);
+    }
+
+    public UnsetChannelException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnsetChannelException(Throwable cause) {
+        super(cause);
+    }
+}

@@ -1,13 +1,20 @@
 package com.github.doomsdayrs.TodayInSocialism.core;
 
 import com.github.doomsdayrs.TodayInSocialism.command.Commands;
+import com.github.doomsdayrs.TodayInSocialism.command.HelpCommand;
 import com.github.doomsdayrs.TodayInSocialism.support.Logs;
+import com.github.doomsdayrs.TodayInSocialism.support.Others;
+import com.github.doomsdayrs.TodayInSocialism.support.SQL.SQL;
+import com.github.doomsdayrs.TodayInSocialism.support.SQL.SQLControl;
 import de.btobastian.sdcf4j.CommandHandler;
 import de.btobastian.sdcf4j.handler.JavacordHandler;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.PermissionsBuilder;
+
+import java.io.IOException;
+import java.sql.SQLException;
 
 /**
  * This file is part of TodayInSocialismBot.
@@ -46,22 +53,32 @@ public class Core {
 
         //Config
         Config.confirmConfig();
-        String[] config = Config.ReturnData();
+        Others.config = Config.ReturnData();
         if (!debug)
             Logs.runLogging();
 
-
         //The bulk of the program
-        API = new DiscordApiBuilder().setToken(config[0]).login().join();
+        API = new DiscordApiBuilder().setToken(Others.config[0]).login().join();
         CommandHandler cmdHandler = new JavacordHandler(API);
+
+        try {
+            SQL.toRam();
+            SQL.initialize();
+            SQLControl.storeServers(API.getServers());
+            SQL.toHard();
+        } catch (ClassNotFoundException | IOException | SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
         cmdHandler.setDefaultPrefix("s!");
         cmdHandler.registerCommand(new Commands(API));
+        cmdHandler.registerCommand(new HelpCommand(cmdHandler));
+
         API.addServerJoinListener(event ->
-        {
-            event.getServer().getOwner().sendMessage("Thanks for inviting me to your server! " +
-                    "\n I'm programed and maintained by doomsdayrs@gmail.com! " +
-                    "\n This is my prefix ``" + cmdHandler.getDefaultPrefix() + "``");
-        });
+                event.getServer().getOwner().sendMessage("Thanks for inviting me to your server! " +
+                        "\n I'm programed and maintained by doomsdayrs@gmail.com! " +
+                        "\n This is my prefix ``" + cmdHandler.getDefaultPrefix() + "``"));
         System.out.println(API.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES, PermissionType.READ_MESSAGES, PermissionType.ATTACH_FILE, PermissionType.EMBED_LINKS).build()));
 
     }
