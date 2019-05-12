@@ -1,2 +1,7 @@
 # TodayInSocialismBot
 TodayInSocailism is a discord bot that announces events that have taken place throughout the history of socialism
+
+I hope that we as comrades can add to the event.json inorder to provide everyone with proper newsreal of history. 
+
+The bot invite is below
+https://discordapp.com/oauth2/authorize?client_id=576212727287119896&scope=bot&permissions=52224
