@@ -2,6 +2,7 @@ package com.github.doomsdayrs.TodayInSocialism.core;
 
 import com.github.doomsdayrs.TodayInSocialism.command.Commands;
 import com.github.doomsdayrs.TodayInSocialism.command.HelpCommand;
+import com.github.doomsdayrs.TodayInSocialism.support.EventLoader;
 import com.github.doomsdayrs.TodayInSocialism.support.Logs;
 import com.github.doomsdayrs.TodayInSocialism.support.Others;
 import com.github.doomsdayrs.TodayInSocialism.support.SQL.SQL;
@@ -12,6 +13,7 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.PermissionsBuilder;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -60,6 +62,12 @@ public class Core {
         //The bulk of the program
         API = new DiscordApiBuilder().setToken(Others.config[0]).login().join();
         CommandHandler cmdHandler = new JavacordHandler(API);
+        try {
+            EventLoader.initialize();
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
 
         try {
             SQL.toRam();

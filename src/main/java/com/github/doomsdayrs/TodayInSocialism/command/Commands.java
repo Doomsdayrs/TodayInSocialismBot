@@ -2,6 +2,7 @@ package com.github.doomsdayrs.TodayInSocialism.command;
 
 import com.github.doomsdayrs.TodayInSocialism.core.Version;
 import com.github.doomsdayrs.TodayInSocialism.support.Embeds;
+import com.github.doomsdayrs.TodayInSocialism.support.EventLoader;
 import com.github.doomsdayrs.TodayInSocialism.support.Logs;
 import com.github.doomsdayrs.TodayInSocialism.support.SQL.SQL;
 import com.github.doomsdayrs.TodayInSocialism.support.SQL.SQLControl;
@@ -109,6 +110,23 @@ public class Commands implements CommandExecutor {
                 SQL.backup();
                 channel.sendMessage(Embeds.message("Backed up database"));
             } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            channel.sendMessage(Embeds.message("You aren't my creator silly!"));
+        }
+    }
+
+    @Command(aliases = {"dl"}, showInHelpPage = false)
+    public void onDLCommand(TextChannel channel, User user) {
+        Logs.logCommand(channel, user, "store");
+        String ID = user.getIdAsString();
+        if (ID.equals("244481558831038464")) {
+            try {
+                EventLoader.downloadLatest();
+                System.out.println("Downloaded latest");
+            } catch (IOException | ParseException e) {
                 e.printStackTrace();
             }
 

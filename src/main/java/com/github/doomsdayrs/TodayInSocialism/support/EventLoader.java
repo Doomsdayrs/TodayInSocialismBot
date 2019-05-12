@@ -1,6 +1,16 @@
 package com.github.doomsdayrs.TodayInSocialism.support;
 
+import com.github.doomsdayrs.TodayInSocialism.core.Config;
+import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * This file is part of TodayInSocialismBot.
@@ -24,11 +34,20 @@ import org.json.simple.JSONArray;
 public class EventLoader {
     public static JSONArray jsonArray = new JSONArray();
 
-    public static void initialize() {
+    private static final String url = "https://raw.githubusercontent.com/Doomsdayrs/TodayInSocialismBot/master/events.json";
+
+    public static void main(String[] args) throws IOException {
+        FileWriter fileWriter = new FileWriter(new File("/home/doomsdayrs/IdeaProjects/TodayInSocialismBot/events.json"));
+        fileWriter.write(jsonArray.toJSONString());
+        fileWriter.flush();
+    }
+
+    public static void initialize() throws IOException, ParseException {
         downloadLatest();
     }
 
-    public static void downloadLatest() {
-
+    public static void downloadLatest() throws IOException, ParseException {
+        FileUtils.copyURLToFile(new URL(url), new File(Config.execDir + "Data/events.json"));
+        jsonArray = (JSONArray) new JSONParser().parse(new FileReader(new File(Config.execDir + "Data/events.json")));
     }
 }
