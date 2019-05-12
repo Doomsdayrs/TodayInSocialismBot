@@ -102,6 +102,11 @@ public class SQLControl {
     public static void announce(DiscordApi api) throws SQLException, ParseException {
         Statement statement = SQL.connection.createStatement();
         ResultSet set = statement.executeQuery("select * from serverData");
+        ArrayList<ServerConfig> serverConfigs = new ArrayList<>();
+        while (set.next()) {
+            serverConfigs.add(new ServerConfig(set.getLong("id"), set.getString("config"), set.getLong("lastOut")));
+        }
+
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
         ArrayList<String> messageQueue = new ArrayList<>();
@@ -120,7 +125,8 @@ public class SQLControl {
                 }
             }
         }
-        while (set.next()) {
+
+        for (ServerConfig serverConfig : serverConfigs) {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
@@ -128,7 +134,7 @@ public class SQLControl {
             }
             //Continues if there are events
             if (events) {
-                String configString = set.getString("config");
+                String configString = serverConfig.config;
                 System.out.println(configString);
 
                 if (configString != null) { //Checks to see if config isnt null
@@ -143,10 +149,10 @@ public class SQLControl {
 
                         if (currentHour == hour) {//Checks to see if it is time to announce for them
                             long currentTime = new Date().getTime();
-                            long lastTime = set.getLong("lastOut");
+                            long lastTime = serverConfig.lastOut;
 
                             if (currentTime >= lastTime + 86400000) {//Announces if they haven't been informed in 24 hours
-                                statement.executeUpdate("update serverData set lastOut = " + currentTime);
+                                statement.executeUpdate("update serverData set lastOut = '" + currentTime + "' where id = " + serverConfig.id);
 
                                 //Gets the channel
                                 long channelID = Long.parseLong(jsonObject.get("channel").toString());
@@ -162,8 +168,14 @@ public class SQLControl {
                                         //Announces the events of today
                                         //TODO Change this to be a different form of @everyone
                                         textChannel.sendMessage("@everyone");
-                                        for (String string : messageQueue)
+                                        for (String string : messageQueue) {
                                             textChannel.sendMessage(string);
+                                            try {
+                                                TimeUnit.MILLISECONDS.sleep(400);
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -172,5 +184,17 @@ public class SQLControl {
                 }
             }
         }
+    }
+}
+
+class ServerConfig {
+    public final long id;
+    public final String config;
+    public final long lastOut;
+
+    ServerConfig(long id, String config, long lastOut) {
+        this.id = id;
+        this.config = config;
+        this.lastOut = lastOut;
     }
 }
