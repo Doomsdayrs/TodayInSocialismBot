@@ -83,10 +83,16 @@ public class Core {
         cmdHandler.registerCommand(new Commands(API));
         cmdHandler.registerCommand(new HelpCommand(cmdHandler));
 
-        API.addServerJoinListener(event ->
+        API.addServerJoinListener(event -> {
                 event.getServer().getOwner().sendMessage("Thanks for inviting me to your server! " +
                         "\n I'm programed and maintained by doomsdayrs@gmail.com! " +
-                        "\n This is my prefix ``" + cmdHandler.getDefaultPrefix() + "``"));
+                        "\n This is my prefix ``" + cmdHandler.getDefaultPrefix() + "``");
+            try {
+                SQLControl.newServer(event.getServer().getId());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
         System.out.println(API.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES, PermissionType.READ_MESSAGES, PermissionType.ATTACH_FILE, PermissionType.EMBED_LINKS).build()));
         while (true) {
 

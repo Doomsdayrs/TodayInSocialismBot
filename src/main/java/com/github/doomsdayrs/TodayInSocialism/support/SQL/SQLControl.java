@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This file is part of TodayInSocialismBot.
@@ -92,7 +93,7 @@ public class SQLControl {
         return false;
     }
 
-    private static void newServer(long id) throws SQLException {
+    public static void newServer(long id) throws SQLException {
         Statement statement = SQL.connection.createStatement();
         if ((statement.executeQuery("select count() from serverData where id = " + id).getInt("count()")) != 1) // Checks if the server row exists in serverData table
             statement.executeUpdate("insert into serverData (id,lastOut) values(" + id + ",0)"); // Inserts fresh Data
@@ -100,7 +101,7 @@ public class SQLControl {
 
     public static void announce(DiscordApi api) throws SQLException, ParseException {
         Statement statement = SQL.connection.createStatement();
-        ResultSet set = statement.executeQuery("select id,config,lastOut from serverData");
+        ResultSet set = statement.executeQuery("select * from serverData");
         DateTime dateTime = new DateTime(DateTimeZone.UTC);
 
         ArrayList<String> messageQueue = new ArrayList<>();
@@ -119,10 +120,12 @@ public class SQLControl {
                 }
             }
         }
-
         while (set.next()) {
-            System.out.println(set.getString("id"));
-
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             //Continues if there are events
             if (events) {
                 String configString = set.getString("config");
@@ -161,7 +164,6 @@ public class SQLControl {
                                         textChannel.sendMessage("@everyone");
                                         for (String string : messageQueue)
                                             textChannel.sendMessage(string);
-
                                     }
                                 }
                             }
