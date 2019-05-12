@@ -6,7 +6,7 @@
 
     <groupId>com.github.doomsdayrs</groupId>
     <artifactId>TodayInSocialismBot</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <build>
         <plugins>

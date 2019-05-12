@@ -20,6 +20,6 @@ package com.github.doomsdayrs.TodayInSocialism.core;
  * @author github.com/doomsdayrs
  */
 public class Version {
-    public static String VersionNum = "1.0.0";
+    public static String VersionNum = "1.0.1";
     public static String changeLog = "*Completed and rolled out";
 }
