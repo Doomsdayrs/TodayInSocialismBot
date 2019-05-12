@@ -148,7 +148,6 @@ public class Commands implements CommandExecutor {
         }
     }
 
-
     @Command(aliases = {"tA"}, showInHelpPage = false)
     public void onTAommand(TextChannel channel, User user) {
         Logs.logCommand(channel, user, "tA");
@@ -169,13 +168,15 @@ public class Commands implements CommandExecutor {
     public void onSetChannelCommand(TextChannel channel, Server server, User user) {
         Logs.logCommand(channel, user, "info");
         if (server != null) {
-            try {
-                if (SQLControl.setChannel(server.getId(), channel.getId()))
-                    channel.sendMessage(Embeds.message("Set properly"));
-                else channel.sendMessage(Embeds.message("Not set"));
-            } catch (SQLException | ParseException e) {
-                System.out.println("Something went wrong");
-                channel.sendMessage(Embeds.message("Something went wrong!!!"));
+            if (server.canManage(user)) {
+                try {
+                    if (SQLControl.setChannel(server.getId(), channel.getId()))
+                        channel.sendMessage(Embeds.message("Set properly"));
+                    else channel.sendMessage(Embeds.message("Not set"));
+                } catch (SQLException | ParseException e) {
+                    System.out.println("Something went wrong");
+                    channel.sendMessage(Embeds.message("Something went wrong!!!"));
+                }
             }
         } else channel.sendMessage(Embeds.message("Not une server"));
     }
@@ -184,22 +185,24 @@ public class Commands implements CommandExecutor {
     public void onSetTimeCommand(TextChannel channel, Server server, User user, String command, String timeString) {
         Logs.logCommand(channel, user, "info");
         if (server != null) {
-            try {
-                int time = Integer.parseInt(timeString.replace(command, ""));
-                if (time < 24 && time > -1) {
-                    try {
-                        if (SQLControl.setHour(server.getId(), time))
-                            channel.sendMessage(Embeds.message("Set properly"));
-                        else channel.sendMessage(Embeds.message("Not set"));
-                    } catch (SQLException | ParseException e) {
-                        System.out.println("Something went wrong");
-                        channel.sendMessage(Embeds.message("Something went wrong!!!"));
-                    } catch (UnsetChannelException e) {
-                        channel.sendMessage(Embeds.message("Please set the channel first fools!"));
-                    }
-                } else channel.sendMessage(Embeds.message("Time provided is out of bounds!"));
-            } catch (NumberFormatException e) {
-                channel.sendMessage(Embeds.message("That is not an hour of the day"));
+            if (server.canManage(user)) {
+                try {
+                    int time = Integer.parseInt(timeString.replace(command, ""));
+                    if (time < 24 && time > -1) {
+                        try {
+                            if (SQLControl.setHour(server.getId(), time))
+                                channel.sendMessage(Embeds.message("Set properly"));
+                            else channel.sendMessage(Embeds.message("Not set"));
+                        } catch (SQLException | ParseException e) {
+                            System.out.println("Something went wrong");
+                            channel.sendMessage(Embeds.message("Something went wrong!!!"));
+                        } catch (UnsetChannelException e) {
+                            channel.sendMessage(Embeds.message("Please set the channel first fools!"));
+                        }
+                    } else channel.sendMessage(Embeds.message("Time provided is out of bounds!"));
+                } catch (NumberFormatException e) {
+                    channel.sendMessage(Embeds.message("That is not an hour of the day"));
+                }
             }
         } else channel.sendMessage(Embeds.message("Not une server"));
     }
