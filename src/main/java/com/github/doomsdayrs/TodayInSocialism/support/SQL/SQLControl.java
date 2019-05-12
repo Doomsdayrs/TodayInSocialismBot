@@ -127,32 +127,41 @@ public class SQLControl {
             if (events) {
                 String configString = set.getString("config");
                 System.out.println(configString);
+
                 if (configString != null) { //Checks to see if config isnt null
+
                     JSONObject jsonObject = (JSONObject) new JSONParser().parse(configString);
                     String time = jsonObject.get("time").toString();
+
                     if (time != null && !time.isEmpty()) {//Checks to see if time was set or not.
+
                         int hour = Integer.parseInt(time);
                         int currentHour = dateTime.getHourOfDay();
-                        System.out.println(hour + "|" + currentHour);
 
                         if (currentHour == hour) {//Checks to see if it is time to announce for them
                             long currentTime = new Date().getTime();
                             long lastTime = set.getLong("lastOut");
+
                             if (currentTime >= lastTime + 86400000) {//Announces if they haven't been informed in 24 hours
-                                statement.executeUpdate("updateServerData set lastOut = " + currentTime);
+                                statement.executeUpdate("update serverData set lastOut = " + currentTime);
+
                                 //Gets the channel
                                 long channelID = Long.parseLong(jsonObject.get("channel").toString());
                                 Optional<Channel> optionalChannel = api.getChannelById(channelID);
                                 if (optionalChannel.isPresent()) {
+
                                     Channel channel = optionalChannel.get();
                                     Optional<TextChannel> optionalTextChannel = channel.asTextChannel();
+
                                     if (optionalTextChannel.isPresent()) {
+
                                         TextChannel textChannel = optionalTextChannel.get();
                                         //Announces the events of today
                                         //TODO Change this to be a different form of @everyone
                                         textChannel.sendMessage("@everyone");
                                         for (String string : messageQueue)
                                             textChannel.sendMessage(string);
+
                                     }
                                 }
                             }
