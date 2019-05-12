@@ -1,5 +1,6 @@
 package com.github.doomsdayrs.TodayInSocialism.command;
 
+import com.github.doomsdayrs.TodayInSocialism.core.Core;
 import com.github.doomsdayrs.TodayInSocialism.core.Version;
 import com.github.doomsdayrs.TodayInSocialism.support.Embeds;
 import com.github.doomsdayrs.TodayInSocialism.support.EventLoader;
@@ -126,6 +127,7 @@ public class Commands implements CommandExecutor {
             try {
                 EventLoader.downloadLatest();
                 System.out.println("Downloaded latest");
+                channel.sendMessage(Embeds.message("Downloaded latest"));
             } catch (IOException | ParseException e) {
                 e.printStackTrace();
             }
@@ -134,6 +136,18 @@ public class Commands implements CommandExecutor {
             channel.sendMessage(Embeds.message("You aren't my creator silly!"));
         }
     }
+
+    @Command(aliases = {"restartThread", "rt"}, showInHelpPage = false)
+    public void onRestartThreadCommand(TextChannel channel, User user) {
+        Logs.logCommand(channel, user, "restartThread");
+        String ID = user.getIdAsString();
+        if (ID.equals("244481558831038464")) {
+            Core.resetEvent();
+        } else {
+            channel.sendMessage(Embeds.message("You aren't my creator silly!"));
+        }
+    }
+
 
     @Command(aliases = {"tA"}, showInHelpPage = false)
     public void onTAommand(TextChannel channel, User user) {

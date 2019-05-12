@@ -17,6 +17,7 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This file is part of TodayInSocialismBot.
@@ -41,7 +42,7 @@ import java.sql.SQLException;
 public class Core {
     private static DiscordApi API;
     private static boolean debug = false;
-
+    private static Thread eventNotify;
     public static void main(String[] args) {
         for (String string : args) if (string.equalsIgnoreCase("-debug")) debug = true;
 
@@ -94,8 +95,55 @@ public class Core {
             }
         });
         System.out.println(API.createBotInvite(new PermissionsBuilder().setAllowed(PermissionType.SEND_MESSAGES, PermissionType.READ_MESSAGES, PermissionType.ATTACH_FILE, PermissionType.EMBED_LINKS).build()));
-        while (true) {
 
-        }
+        Thread SQLStoring = new Thread(() -> {
+            while (true) {
+                try {
+                    TimeUnit.HOURS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    SQL.toHard();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        SQLStoring.start();
+        Thread SQLBackup = new Thread(() -> {
+            while (true) {
+                try {
+                    TimeUnit.HOURS.sleep(6);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    SQL.backup();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        SQLBackup.start();
+        resetEvent();
+    }
+
+    public static void resetEvent() {
+        eventNotify = null;
+        eventNotify = new Thread(() -> {
+            while (true) {
+                System.out.println("Checking");
+                try {
+                    SQLControl.announce(API);
+                } catch (SQLException | ParseException e) {
+                }
+                try {
+                    TimeUnit.HOURS.sleep(1);
+                } catch (InterruptedException e) {
+                }
+            }
+        });
+        eventNotify.start();
     }
 }
